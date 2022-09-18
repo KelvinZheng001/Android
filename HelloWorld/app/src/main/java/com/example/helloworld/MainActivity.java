@@ -1,11 +1,16 @@
 package com.example.helloworld;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
@@ -24,10 +29,8 @@ import java.util.UUID;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import android.util.Log;
 
@@ -36,8 +39,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.widget.Toast;
-
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener
@@ -59,11 +60,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     // 为其链接创建一个名称
     private final String NAME = "Bluetooth_Socket";
     // 选中发送数据的蓝牙设备，全局变量，否则连接在方法执行完就结束了
-    private BluetoothDevice selectDevice;
+    private BluetoothDevice _selectDevice;
     // 获取到选中设备的客户端串口，全局变量，否则连接在方法执行完就结束了
-    private BluetoothSocket clientSocket;
+    private BluetoothSocket _clientSocket;
     // 获取到向设备写的输出流，全局变量，否则连接在方法执行完就结束了
-    private OutputStream os;
+    private OutputStream _os;
+    private InputStream _is;
     // 服务端利用线程不断接受客户端信息
     private AcceptThread thread;
     //定义按钮
@@ -75,8 +77,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Button breath = null;
     private TextView receive1;
     private SeekBar seekBar;
-    private String LED_STATE = "A 红灯亮";
+    private String LED_STATE = "hello";
     private TextView re_msg;
+    private TextView _textViewV1;
 
 //    @Override
 //    protected void onCreate(Bundle savedInstanceState)
@@ -92,6 +95,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     {
         String str = "Hello, 雯琪";
         _txtViewHello.setText(str);
+
+        //搜索蓝牙设备
+        setTitle("正在扫描...");
+
+        _txtViewHello.setText("正在扫描...");
+        // 点击搜索周边设备，如果正在搜索，则暂停搜索
+        if (mBluetoothAdapter.isDiscovering())
+        {
+            mBluetoothAdapter.cancelDiscovery();
+        }
+        mBluetoothAdapter.startDiscovery();
+
     }
 
 
@@ -102,6 +117,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
         _txtViewHello = findViewById(R.id.textViewHello);
         Button button1 = findViewById(R.id.button1);
+        _textViewV1 = findViewById(R.id.textViewV1);
 
 //        red1 = (Button) findViewById(R.id.red);
 //        green1 = (Button) findViewById(R.id.green);
@@ -182,6 +198,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 //            }
 //        });
 
+        //申请蓝牙权限, 同时Manifest中还需要添加这两行:
+        //    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+        //    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+        if (Build.VERSION.SDK_INT >= 6.0)
+        {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
 
         // 获取到蓝牙默认的适配器
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -218,9 +242,25 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         thread.start();
     }
 
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        switch (requestCode)
+        {
+            case 1:
+            {
+                // If request is cancelled, the result arrays are empty.
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    Log.i(TAG, "获取蓝牙权限成功");
+            }
+            return;
+        }
+    }
+
+
     //搜索蓝牙设备
     public void onClick_Search(View view)
     {
+        //搜索蓝牙设备
         setTitle("正在扫描...");
         // 点击搜索周边设备，如果正在搜索，则暂停搜索
         if (mBluetoothAdapter.isDiscovering())
@@ -229,6 +269,74 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         mBluetoothAdapter.startDiscovery();
     }
+
+    public void onClick_buttonA1On(View view)
+    {
+        //需要发送的信息
+        String text = "a1on\r\n";
+
+        try
+        {
+            if (_os == null)
+            {
+                Toast.makeText(this, "Not Connected",  Toast.LENGTH_SHORT).show();
+                return;
+            }
+            _os.write(text.getBytes("UTF-8"));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            Toast.makeText(this, "发送a1on失败",  Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    public void onClick_buttonB1On(View view)
+    {
+        String text = "b1on\r\n";
+
+        try
+        {
+            if (_os == null)
+            {
+                Toast.makeText(this, "Not Connected",  Toast.LENGTH_SHORT).show();
+                return;
+            }
+            _os.write(text.getBytes("UTF-8"));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            Toast.makeText(this, "发送a1on失败",  Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+    public void onClick_buttonOff1(View view)
+    {
+        //Toggle switch1
+        String text = "off\r\n";
+
+        try
+        {
+            if (_os == null)
+            {
+                Toast.makeText(this, "Not Connected",  Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            _os.write(text.getBytes("UTF-8"));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            Toast.makeText(this, "发送f1失败",  Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+
+
+
 
     // 注册广播接收者
     private BroadcastReceiver receiver = new BroadcastReceiver()
@@ -268,6 +376,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
+        //_clientSocket, 断开按钮点击后设置为空.
+        if (_clientSocket != null)
+            return;
+
         // 获取到这个设备的信息
         String s = arrayAdapter.getItem(position);
         // 对其进行分割，获取到这个设备的地址
@@ -279,41 +391,47 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             mBluetoothAdapter.cancelDiscovery();
         }
         // 如果选择设备为空则代表还没有选择设备
-        if (selectDevice == null)
+        if (_selectDevice == null)
         {
             //通过地址获取到该设备
-            selectDevice = mBluetoothAdapter.getRemoteDevice(address);
+            _selectDevice = mBluetoothAdapter.getRemoteDevice(address);
         }
         // 这里需要try catch一下，以防异常抛出
         try
         {
             // 判断客户端接口是否为空
-            if (clientSocket == null)
+            if (_clientSocket == null)
             {
-                // 获取到客户端接口
-                clientSocket = selectDevice.createRfcommSocketToServiceRecord(MY_UUID);
+                // 获取到客户端接口   注:如果还未配对, 则系统会弹出配对对话框进行配对.
+                _clientSocket = _selectDevice.createRfcommSocketToServiceRecord(MY_UUID);
                 // 向服务端发送连接
-                clientSocket.connect();
+                _clientSocket.connect();
                 // 获取到输出流，向外写数据
-                os = clientSocket.getOutputStream();
+                _os = _clientSocket.getOutputStream();
+                _is = _clientSocket.getInputStream();
 
             }
             // 判断是否拿到输出流
-            if (os != null)
+            if (_is != null)
             {
                 // 需要发送的信息
                 //String text = "我传过去了";
                 // 以utf-8的格式发送出去
-                os.write(LED_STATE.getBytes("UTF-8"));
+                //_os.write(LED_STATE.getBytes("UTF-8"));
+
+                //启动数据接收线程
+                receiveTask.execute();
+
+                Toast.makeText(this, "连接成功", Toast.LENGTH_LONG).show();
+
             }
-            // 吐司一下，告诉用户发送成功
-            Toast.makeText(this, "发送信息成功，请查收", 0).show();
+
         } catch (IOException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
             // 如果发生异常则告诉用户发送失败
-            Toast.makeText(this, "发送信息失败", 0).show();
+            Toast.makeText(this, "连接失败", Toast.LENGTH_LONG).show();
         }
 
     }
@@ -328,9 +446,53 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             super.handleMessage(msg);
             // 通过msg传递过来的信息，吐司一下收到的信息
             // Toast.makeText(BuletoothClientActivity.this, (String) msg.obj, Toast.LENGTH_SHORT).show();
-            re_msg.setText((String) msg.obj);
+            _textViewV1.setText((String) msg.obj);
         }
     };
+
+
+    AsyncTask receiveTask = new AsyncTask()
+    {
+
+        @Override
+        protected String doInBackground(Object[] params)
+        {
+            byte[] buffer = new byte[100];
+            int count = 0;
+            while (true)
+            {
+                try
+                {
+                    count = _is.read(buffer);
+                    int a = _is.available();
+
+                    Message msg = new Message();
+                    // 发送一个String的数据，让他向上转型为obj类型
+                    msg.obj = new String(buffer, 0, count, "utf-8");
+                    // 发送数据
+                    handler.sendMessage(msg);
+
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Object o)
+        {
+            super.onPostExecute(o);
+            Toast.makeText(getApplicationContext(), "2", Toast.LENGTH_SHORT).show();
+        }
+    };
+
 
     // 服务端接收信息线程
     private class AcceptThread extends Thread
@@ -345,8 +507,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             try
             {
                 // 通过UUID监听请求，然后获取到对应的服务端接口
-                serverSocket = mBluetoothAdapter
-                        .listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
+                serverSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
             } catch (Exception e)
             {
                 e.printStackTrace();

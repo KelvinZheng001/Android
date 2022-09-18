@@ -14,32 +14,88 @@
         android:textAlignment="center"
         android:textSize="34sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.409"
+        app:layout_constraintHorizontal_bias="0.101"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.063" />
+        app:layout_constraintVertical_bias="0.023" />
 
     <Button
         android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:onClick="button1_click"
-        android:text="Button"
+        android:layout_width="174dp"
+        android:layout_height="58dp"
+        android:layout_marginTop="12dp"
+        android:onClick="onClick_Search"
+        android:text="Search"
+        android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.466"
+        app:layout_constraintHorizontal_bias="0.046"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewHello" />
 
     <ListView
         android:id="@+id/lvDevices"
-        android:layout_width="372dp"
-        android:layout_height="483dp"
-        android:layout_marginTop="32dp"
+        android:layout_width="384dp"
+        android:layout_height="243dp"
+        android:layout_marginTop="4dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.41"
+        app:layout_constraintHorizontal_bias="0.407"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button1" />
+
+    <TextView
+        android:id="@+id/textViewV1"
+        android:layout_width="380dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="4dp"
+        android:text="TextView"
+        android:textSize="24sp"
+        app:layout_constraintTop_toBottomOf="@+id/lvDevices"
+        tools:layout_editor_absoluteX="11dp" />
+
+    <Button
+        android:id="@+id/buttonOn1"
+        android:layout_width="131dp"
+        android:layout_height="51dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
+        android:onClick="onClick_buttonA1On"
+        android:text="A1 开"
+        android:textAllCaps="true"
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textViewV1" />
+
+    <Button
+        android:id="@+id/buttonOn2"
+        android:layout_width="131dp"
+        android:layout_height="51dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="92dp"
+        android:onClick="onClick_buttonB1On"
+        android:text="B1 开"
+        android:textAllCaps="true"
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/textViewV1" />
+
+    <Button
+        android:id="@+id/buttonOn"
+        android:layout_width="142dp"
+        android:layout_height="126dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
+        android:onClick="onClick_buttonOff1"
+        android:text="关"
+        android:textAllCaps="true"
+        app:layout_constraintStart_toEndOf="@+id/buttonOn1"
+        app:layout_constraintTop_toBottomOf="@+id/textViewV1" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="TextView"
+        app:layout_constraintTop_toBottomOf="@+id/textViewV1"
+        tools:layout_editor_absoluteX="11dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
